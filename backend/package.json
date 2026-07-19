@@ -1,0 +1,1 @@
+{"scripts":{"dev":"nodemon src/server.js","start":"node src/server.js"},"dependencies":{"@supabase/supabase-js":"latest","cors":"latest","dotenv":"latest","express":"latest","multer":"^2.2.0","uuid":"latest","xlsx":"https://cdn.sheetjs.com/xlsx-0.20.3/xlsx-0.20.3.tgz"},"devDependencies":{"nodemon":"latest"},"type":"module"}
