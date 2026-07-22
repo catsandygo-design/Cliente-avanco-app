@@ -336,7 +336,6 @@ function AuthScreen() {
   const [cadastro, setCadastro] = useState(false);
   const [form, setForm] = useState({ nome: "", email: "", senha: "" });
   const [erro, setErro] = useState("");
-  const [aba, setAba] = useState("gestao");
   const [enviando, setEnviando] = useState(false);
   const [capsLockAtivo, setCapsLockAtivo] = useState(false);
   const verificarCapsLock = (event) =>
@@ -463,7 +462,7 @@ function App() {
   const [clienteSelecionado, setClienteSelecionado] = useState(null);
   const [repasseSelecionado, setRepasseSelecionado] = useState(null);
   const [tela, setTela] = useState("clientes");
- …45721 tokens truncated…poIndex + 1).padStart(2, "0")}</span>
+  const [sidebarRecolhida, setSidebarRecolhid…45721 tokens truncated…poIndex + 1).padStart(2, "0")}</span>
                         <h3>{grupo.nome}</h3>
                       </div>
                       <ol>
