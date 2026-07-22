@@ -202,6 +202,49 @@ const resumo = () => ({
 });
 
 app.get('/api/etapas', (_, res) => res.json(etapas));
+app.get('/api/pre-cadastros', async (req, res) => {
+  try {
+    const orgId = await getOrganizationId();
+    const q = String(req.query.q || '').trim();
+    let consulta = supabase.from('pre_registrations').select('*').eq('organization_id', orgId).order('created_at', { ascending: false });
+    if (q) consulta = consulta.or(`client_name.ilike.%${q}%,code.ilike.%${q}%,cpf_cnpj.ilike.%${q}%`);
+    const { data, error } = await consulta;
+    if (error) throw error;
+    res.json(data);
+  } catch (error) { responderErroInterno(res, error, 'listar-pre-cadastros'); }
+});
+app.post('/api/pre-cadastros', allowRoles('owner','admin','manager','analyst','broker'), async (req, res) => {
+  try {
+    const orgId = await getOrganizationId();
+    const payload = {
+      organization_id: orgId, code: req.body.code || `PC-${Date.now().toString().slice(-7)}`,
+      client_name: String(req.body.client_name || '').trim(), cpf_cnpj: req.body.cpf_cnpj || null,
+      email: req.body.email || null, phone: req.body.phone || null, development: req.body.development || null,
+      broker_name: req.body.broker_name || null, real_estate_agency: req.body.real_estate_agency || null,
+      status: req.body.status || 'Novo', notes: req.body.notes || null, created_by: req.user?.id || null
+    };
+    if (!payload.client_name) return res.status(400).json({ erro: 'Nome do cliente é obrigatório' });
+    const { data, error } = await supabase.from('pre_registrations').insert(payload).select().single();
+    if (error) throw error;
+    res.status(201).json(data);
+  } catch (error) { responderErroInterno(res, error, 'criar-pre-cadastro'); }
+});
+app.patch('/api/pre-cadastros/:id', allowRoles('owner','admin','manager','analyst','broker'), async (req, res) => {
+  try {
+    const permitidos = ['client_name','cpf_cnpj','email','phone','development','broker_name','real_estate_agency','status','notes'];
+    const payload = Object.fromEntries(Object.entries(req.body).filter(([chave]) => permitidos.includes(chave)));
+    const { data, error } = await supabase.from('pre_registrations').update(payload).eq('id', req.params.id).select().single();
+    if (error) throw error;
+    res.json(data);
+  } catch (error) { responderErroInterno(res, error, 'atualizar-pre-cadastro'); }
+});
+app.delete('/api/pre-cadastros/:id', allowRoles('owner','admin'), async (req, res) => {
+  try {
+    const { error } = await supabase.from('pre_registrations').delete().eq('id', req.params.id);
+    if (error) throw error;
+    res.status(204).end();
+  } catch (error) { responderErroInterno(res, error, 'excluir-pre-cadastro'); }
+});
 app.get('/api/resumo', async (_, res) => {
   try {
     if (!supabase) return res.json(resumo());
