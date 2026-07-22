@@ -462,7 +462,74 @@ function App() {
   useEffect(() => {
     if (!supabaseClient) return;
     supabaseClient.auth.getUser().then(({ data }) => {
-      const user = …37975 tokens truncated…ds">
+      const user = …38501 tokens truncated…span>
+                        <h3>{grupo.nome}</h3>
+                      </div>
+                      <ol>
+                        {grupo.documentos.map((documento) => (
+                          <li key={documento}>
+                            <Check size={13} />
+                            <span>{documento}</span>
+                          </li>
+                        ))}
+                      </ol>
+                      {grupo.regras && (
+                        <div className="required-rules">
+                          {grupo.regras.map((regra) => (
+                            <p key={regra}>
+                              <HelpCircle size={13} />
+                              {regra}
+                            </p>
+                          ))}
+                        </div>
+                      )}
+                    </section>
+                  ))}
+                </div>
+              )}
+              <div className="document-upload-area">
+                <div
+                  className={`upload-zone ${arrastandoDocumento ? "dragging" : ""}`}
+                  onDragOver={(e) => {
+                    e.preventDefault();
+                    setArrastandoDocumento(true);
+                  }}
+                  onDragLeave={() => setArrastandoDocumento(false)}
+                  onDrop={async (e) => {
+                    e.preventDefault();
+                    setArrastandoDocumento(false);
+                    try {
+                      await adicionarDocumentos([...e.dataTransfer.files]);
+                    } catch (error) {
+                      alert(error.message);
+                    }
+                  }}
+                >
+                  <UploadCloud size={25} />
+                  <strong>Adicione ou solte os arquivos aqui</strong>
+                  <span>
+                    JPG, JPEG, GIF, PNG, BMP, PDF, XLS, XLSX, RAR, ZIP, DOC e
+                    DOCX · até 24 MB
+                  </span>
+                  <label className="secondary-button file-picker">
+                    Selecionar arquivos
+                    <input
+                      type="file"
+                      multiple
+                      accept=".jpg,.jpeg,.gif,.png,.bmp,.pdf,.xls,.xlsx,.rar,.zip,.doc,.docx"
+                      onChange={async (e) => {
+                        try {
+                          await adicionarDocumentos([...e.target.files]);
+                        } catch (error) {
+                          alert(error.message);
+                        } finally {
+                          e.target.value = "";
+                        }
+                      }}
+                    />
+                  </label>
+                </div>
+                <div className="document-upload-fields">
                   <label className="document-type-field group-filter-field">
                     <span>Grupo de documentos</span>
                     <select
@@ -730,116 +797,20 @@ function App() {
               titulo="Datas e documentos"
               subtitulo="Marcos do processo e integrações operacionais"
             >
-              <Campo
-                label="Data da posse"
-                nome="dataPosse"
-                dados={dados}
-                campo={campo}
-                tipo="date"
-              />
-              <Campo
-                label="Data do contrato"
-                nome="dataContrato"
-                dados={dados}
-                campo={campo}
-                tipo="date"
-              />
-              <Campo
-                label="Data da venda"
-                nome="dataVenda"
-                dados={dados}
-                campo={campo}
-                tipo="date"
-              />
-              <Campo
-                label="Data da carta proposta"
-                nome="dataCarta"
-                dados={dados}
-                campo={campo}
-                tipo="date"
-              />
-              <Campo
-                label="Data envio CEHOP"
-                nome="dataEnvioCehop"
-                dados={dados}
-                campo={campo}
-                tipo="date"
-              />
-              <Campo
-                label="Conformidade CEHOP"
-                nome="dataConformidadeCehop"
-                dados={dados}
-                campo={campo}
-                tipo="date"
-              />
-              <Campo
-                label="Data da inconformidade"
-                nome="dataInconformidadeCehop"
-                dados={dados}
-                campo={campo}
-                tipo="date"
-              />
-              <Campo
-                label="Data de reenvio para CEHOP"
-                nome="dataReenvioCehop"
-                dados={dados}
-                campo={campo}
-                tipo="date"
-              />
-              <Campo
-                label="Envio confissão de dívida"
-                nome="dataConfissao"
-                dados={dados}
-                campo={campo}
-                tipo="date"
-              />
-              <Campo
-                label="Assinatura da confissão"
-                nome="dataAssinaturaConfissao"
-                dados={dados}
-                campo={campo}
-                tipo="date"
-              />
-              <Campo
-                label="Validação do espelho"
-                nome="dataValidacaoEspelho"
-                dados={dados}
-                campo={campo}
-                tipo="date"
-              />
-              <Campo
-                label="Espelho anexado"
-                nome="dataEspelhoAnexado"
-                dados={dados}
-                campo={campo}
-                tipo="date"
-              />
-              <Campo
-                label="Contrato no portal do cliente"
-                nome="contratoPortal"
-                dados={dados}
-                campo={campo}
-              />
-              <Campo
-                label="Exceção assinatura contrato Caixa"
-                nome="excecaoCaixa"
-                dados={dados}
-                campo={campo}
-              />
-              <Campo
-                label="Observação de finalização"
-                nome="observacaoFinalizacao"
-                dados={dados}
-                campo={campo}
-                largo
-              />
-              <Campo
-                label="Observações gerais"
-                nome="observacoes"
-                dados={dados}
-                campo={campo}
-                largo
-              />
+              {camposDatasOrdenados.map((item) => (
+                <Campo
+                  key={item.nome}
+                  label={item.label}
+                  nome={item.nome}
+                  dados={dados}
+                  campo={campo}
+                  tipo={item.personalizado
+                    ? ({ Data: "date", Número: "number" }[item.tipo] || "text")
+                    : item.tipo}
+                  opcoes={item.personalizado && item.tipo === "Sim/Não" ? ["", "Sim", "Não"] : undefined}
+                  largo={item.largo}
+                />
+              ))}
             </DetailSection>
           </>
         )}
