@@ -253,13 +253,20 @@ const equivalentesDoDocumento = tipo => vinculosDocumentos.find(grupo => grupo.i
 function AuthGate() {
   const [session, setSession] = useState(supabaseClient ? undefined : null);
   const [mfaMode, setMfaMode] = useState(supabaseClient ? 'loading' : 'app');
+  const sessionUserId = useRef(null);
   useEffect(() => {
     if (!supabaseClient) return;
     supabaseClient.auth
       .getSession()
-      .then(({ data }) => setSession(data.session));
+      .then(({ data }) => {
+        sessionUserId.current = data.session?.user?.id || null;
+        setSession(data.session);
+      });
     const { data } = supabaseClient.auth.onAuthStateChange((_, nextSession) => {
-      setMfaMode(nextSession ? 'loading' : 'app');
+      const nextUserId = nextSession?.user?.id || null;
+      if (nextUserId !== sessionUserId.current)
+        setMfaMode(nextSession ? 'loading' : 'app');
+      sessionUserId.current = nextUserId;
       setSession(nextSession);
     });
     return () => data.subscription.unsubscribe();
@@ -269,7 +276,7 @@ function AuthGate() {
     let active = true;
     (async()=>{try{const factors=await supabaseClient.auth.mfa.listFactors();if(factors.error)throw factors.error;const verified=factors.data.totp.filter(f=>f.status==='verified');if(!active)return;if(!verified.length){setMfaMode('enroll');return}const aal=await supabaseClient.auth.mfa.getAuthenticatorAssuranceLevel();if(aal.error)throw aal.error;setMfaMode(aal.data.currentLevel==='aal2'?'app':{type:'challenge',factorId:verified[0].id})}catch{if(active)setMfaMode('enroll')}})();
     return()=>{active=false};
-  }, [session]);
+  }, [session?.user?.id]);
   const reavaliarMfa = async()=>{setMfaMode('loading');const aal=await supabaseClient.auth.mfa.getAuthenticatorAssuranceLevel();setMfaMode(aal.data?.currentLevel==='aal2'?'app':'loading');};
   if (supabaseClient && (session === undefined || mfaMode === 'loading'))
     return (
@@ -461,15 +468,7 @@ function App() {
 
   async function carregar() {
     const params = new URLSearchParams({ q, imobiliaria });
-    setCarregando(true);
-    setErroCarregamento("");
-    try {
-      const respostas = await Promise.all([
-        apiFetch(`${API}/clientes?${params}`),
-        apiFetch(`${API}/etapas`),
-        apiFetch(`${API}/resumo`),
-      ]);
-      const [lista, listaEtapas, dadosResumo]…36825 tokens truncated…ds">
+ …36895 tokens truncated…ds">
                   <label className="document-type-field group-filter-field">
                     <span>Grupo de documentos</span>
                     <select
