@@ -168,6 +168,11 @@ function carregarStatus(tipo) {
   return STATUS_PADRAO[tipo];
 }
 
+function carregarCoresStatus(tipo) {
+  try { return JSON.parse(localStorage.getItem(`avanco-cores-status-${tipo}`) || "{}"); }
+  catch { return {}; }
+}
+
 const gruposDocumentos = [
   {
     nome: "Documentação pessoal",
@@ -457,10 +462,7 @@ function App() {
   const [clienteSelecionado, setClienteSelecionado] = useState(null);
   const [repasseSelecionado, setRepasseSelecionado] = useState(null);
   const [tela, setTela] = useState("clientes");
-  const [sidebarRecolhida, setSidebarRecolhida] = useState(false);
-  const [suporteAberto, setSuporteAberto] = useState(false);
-  const [termoSuporte, setTermoSuporte] = useState("");
-  const [busca…41847 tokens truncated…poIndex + 1).padStart(2, "0")}</span>
+  const [sidebarRecolhida, setSidebarRecolhid…42318 tokens truncated…poIndex + 1).padStart(2, "0")}</span>
                         <h3>{grupo.nome}</h3>
                       </div>
                       <ol>
