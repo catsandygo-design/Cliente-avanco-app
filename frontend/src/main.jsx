@@ -1,3 +1,4 @@
+
 import React, { useEffect, useMemo, useRef, useState } from "react";
 import { createRoot } from "react-dom/client";
 import { createClient } from "@supabase/supabase-js";
@@ -150,6 +151,19 @@ const formularioInicial = {
   repasseMes: true,
   observacoes: "",
 };
+
+const STATUS_PADRAO = {
+  reserva: ["Em processo", "Pendente", "Em análise", "Aprovada", "Cancelada"],
+  repasse: ["Início do repasse", "Em andamento", "Assinatura Caixa", "Validação", "Garantia AGEHAB", "Em processo de distrato"],
+};
+
+function carregarStatus(tipo) {
+  try {
+    const salvos = JSON.parse(localStorage.getItem(`avanco-status-${tipo}`) || "null");
+    if (Array.isArray(salvos) && salvos.length) return salvos;
+  } catch {}
+  return STATUS_PADRAO[tipo];
+}
 
 const gruposDocumentos = [
   {
@@ -448,24 +462,7 @@ function App() {
 
   const topicosSuporte = [
     "Como cadastrar e acompanhar clientes",
-    "Como importar uma planilha",
-    "Como consultar crédito e pendências",
-    "Como configurar o Microsoft Authenticator",
-    "Como gerar relatórios e acompanhar repasses",
-  ];
-  const resultadosSuporte = buscaSuporte
-    ? topicosSuporte.filter((topico) =>
-        topico.toLowerCase().includes(buscaSuporte.toLowerCase()),
-      )
-    : [];
-
-  useEffect(() => {
-    if (!supabaseClient) return;
-    supabaseClient.auth.getUser().then(({ data }) => {
-      const user = …38501 tokens truncated…span>
-                        <h3>{grupo.nome}</h3>
-                      </div>
-                      <ol>
+  …39976 tokens truncated…            <ol>
                         {grupo.documentos.map((documento) => (
                           <li key={documento}>
                             <Check size={13} />
@@ -890,7 +887,7 @@ function Campo({
   );
 }
 
-function ClienteRow({ cliente: c, etapas, atualizar, excluir, abrir }) {
+function ClienteRow({ cliente: c, etapas, atualizar, excluir, abrir, statusOpcoes }) {
   const percentual = etapas.length
     ? Math.round(((c.etapaAtual + 1) / etapas.length) * 100)
     : 0;
@@ -955,11 +952,9 @@ function ClienteRow({ cliente: c, etapas, atualizar, excluir, abrir }) {
         </span>
       </td>
       <td>
-        <input
-          className="table-input status-input"
-          value={c.status}
-          onChange={(e) => atualizar(c.id, { status: e.target.value })}
-        />
+        <select className="table-input status-input" value={c.status || "Em processo"} onChange={(e) => atualizar(c.id, { status: e.target.value })}>
+          {statusOpcoes.map((status) => <option key={status}>{status}</option>)}
+        </select>
       </td>
       <td>
         <input
