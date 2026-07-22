@@ -462,7 +462,7 @@ function App() {
   const [clienteSelecionado, setClienteSelecionado] = useState(null);
   const [repasseSelecionado, setRepasseSelecionado] = useState(null);
   const [tela, setTela] = useState("clientes");
-  const [sidebarRecolhida, setSidebarRecolhid…42374 tokens truncated…poIndex + 1).padStart(2, "0")}</span>
+  const [sidebarRecolhida, setSidebarRecolhid…43006 tokens truncated…poIndex + 1).padStart(2, "0")}</span>
                         <h3>{grupo.nome}</h3>
                       </div>
                       <ol>
