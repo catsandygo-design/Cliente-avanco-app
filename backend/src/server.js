@@ -1,3 +1,4 @@
+
 import express from 'express';
 import cors from 'cors';
 import { v4 as uuid } from 'uuid';
@@ -57,16 +58,14 @@ const supabase = process.env.SUPABASE_URL && process.env.SUPABASE_SECRET_KEY
 let organizationId;
 
 const etapas = [
-  'Reserva criada',
   'Em processo',
-  'Secretaria valida assinaturas',
-  'Importação SIENGE',
-  'Crédito analisa documentos',
-  'CCA / Conformidade',
+  'Secretaria de Vendas',
+  'Envio Sienge',
+  'Crédito',
   'Creditú',
   'Assinatura 7LM',
-  'Empresa assina',
-  'Venda finalizada'
+  'Aprovado Diretoria',
+  'Venda Finalizada'
 ];
 
 let clientes = [
@@ -118,9 +117,10 @@ const dataPlanilha = value => {
 };
 const etapaPlanilha = situacao => {
   const value = textoPlanilha(situacao).toLowerCase();
-  if (value.includes('venda finalizada')) return 9; if (value.includes('assinatura 7lm')) return 7;
-  if (value.includes('fase credit')) return 6; if (value === 'crédito' || value === 'credito') return 4;
-  if (value.includes('sienge')) return 3; if (value.includes('secretaria')) return 2; return 1;
+  if (value.includes('venda finalizada')) return 7; if (value.includes('diretoria')) return 6;
+  if (value.includes('assinatura 7lm')) return 5; if (value.includes('creditú') || value.includes('creditu')) return 4;
+  if (value === 'crédito' || value === 'credito') return 3; if (value.includes('sienge')) return 2;
+  if (value.includes('secretaria')) return 1; return 0;
 };
 const limparLinhaPlanilha = row => Object.fromEntries(Object.entries(row).map(([key,value]) => [key, value instanceof Date ? value.toISOString().slice(0,10) : (value ?? null)]));
 
