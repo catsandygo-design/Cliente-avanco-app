@@ -151,6 +151,9 @@ async function listReservations() {
 }
 
 async function ensureSeedData() {
+  // Dados demonstrativos nunca devem ser recriados automaticamente em produção.
+  // A ativação precisa ser explícita para evitar corrida entre funções serverless.
+  if (process.env.ALLOW_SEED_DATA !== 'true') return;
   const orgId = await getOrganizationId();
   const { count, error } = await supabase.from('reservations').select('id', { count: 'exact', head: true }).eq('organization_id', orgId);
   if (error || count) return;
