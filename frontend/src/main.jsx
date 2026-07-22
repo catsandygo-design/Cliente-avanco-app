@@ -154,13 +154,14 @@ const formularioInicial = {
 };
 
 const STATUS_PADRAO = {
-  reserva: ["Em processo", "Pendente", "Em análise", "Aprovada", "Cancelada"],
+  reserva: ["Em processo", "Secretaria de Vendas", "Envio Sienge", "Crédito", "Creditú", "Assinatura 7LM", "Aprovado Diretoria", "Venda Finalizada"],
   repasse: ["Início do repasse", "Em andamento", "Assinatura Caixa", "Validação", "Garantia AGEHAB", "Em processo de distrato"],
 };
 
 function carregarStatus(tipo) {
   try {
-    const salvos = JSON.parse(localStorage.getItem(`avanco-status-${tipo}`) || "null");
+    const chave = tipo === "reserva" ? "avanco-etapas-reserva-v2" : `avanco-status-${tipo}`;
+    const salvos = JSON.parse(localStorage.getItem(chave) || "null");
     if (Array.isArray(salvos) && salvos.length) return salvos;
   } catch {}
   return STATUS_PADRAO[tipo];
@@ -458,11 +459,10 @@ function App() {
   const [sidebarRecolhida, setSidebarRecolhida] = useState(false);
   const [suporteAberto, setSuporteAberto] = useState(false);
   const [termoSuporte, setTermoSuporte] = useState("");
-  const [buscaSuporte, setBuscaSuporte] = useState("");
-  const [nomeSuporte, setNomeSuporte] = useState("Usuário");
-
-  const topicosSuporte = [
-    "Como cadastrar e acompanha…39980 tokens truncated…            <ol>
+  const [buscaSuporte, setBusc…40171 tokens truncated…poIndex + 1).padStart(2, "0")}</span>
+                        <h3>{grupo.nome}</h3>
+                      </div>
+                      <ol>
                         {grupo.documentos.map((documento) => (
                           <li key={documento}>
                             <Check size={13} />
@@ -887,7 +887,7 @@ function Campo({
   );
 }
 
-function ClienteRow({ cliente: c, etapas, atualizar, excluir, abrir, statusOpcoes }) {
+function ClienteRow({ cliente: c, etapas, atualizar, excluir, abrir }) {
   const percentual = etapas.length
     ? Math.round(((c.etapaAtual + 1) / etapas.length) * 100)
     : 0;
@@ -952,9 +952,7 @@ function ClienteRow({ cliente: c, etapas, atualizar, excluir, abrir, statusOpcoe
         </span>
       </td>
       <td>
-        <select className="table-input status-input" value={c.status || "Em processo"} onChange={(e) => atualizar(c.id, { status: e.target.value })}>
-          {statusOpcoes.map((status) => <option key={status}>{status}</option>)}
-        </select>
+        <input className="table-input status-input" value={c.status || ""} onChange={(e) => atualizar(c.id, { status: e.target.value })} />
       </td>
       <td>
         <input
