@@ -429,6 +429,7 @@ function App() {
   const [cadastroAberto, setCadastroAberto] = useState(false);
   const [menuAberto, setMenuAberto] = useState(false);
   const [carregando, setCarregando] = useState(true);
+  const [erroCarregamento, setErroCarregamento] = useState("");
   const [clienteSelecionado, setClienteSelecionado] = useState(null);
   const [repasseSelecionado, setRepasseSelecionado] = useState(null);
   const [tela, setTela] = useState("clientes");
@@ -461,14 +462,14 @@ function App() {
   async function carregar() {
     const params = new URLSearchParams({ q, imobiliaria });
     setCarregando(true);
+    setErroCarregamento("");
     try {
-      const [lista, listaEtapas, dadosResumo] = await Promise.all([
-        apiFetch(`${API}/clientes?${params}`).then((r) => r.json()),
-        apiFetch(`${API}/etapas`).then((r) => r.json()),
-        apiFetch(`${API}/resumo`).then((r) => r.json()),
+      const respostas = await Promise.all([
+        apiFetch(`${API}/clientes?${params}`),
+        apiFetch(`${API}/etapas`),
+        apiFetch(`${API}/resumo`),
       ]);
-      setClientes(lista);
-      setEtapas(listaE…36528 tokens truncated…ds">
+      const [lista, listaEtapas, dadosResumo]…36825 tokens truncated…ds">
                   <label className="document-type-field group-filter-field">
                     <span>Grupo de documentos</span>
                     <select
