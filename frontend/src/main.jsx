@@ -441,34 +441,28 @@ function App() {
   const [repasseSelecionado, setRepasseSelecionado] = useState(null);
   const [tela, setTela] = useState("clientes");
   const [sidebarRecolhida, setSidebarRecolhida] = useState(false);
+  const [suporteAberto, setSuporteAberto] = useState(false);
+  const [termoSuporte, setTermoSuporte] = useState("");
+  const [buscaSuporte, setBuscaSuporte] = useState("");
+  const [nomeSuporte, setNomeSuporte] = useState("Usuário");
+
+  const topicosSuporte = [
+    "Como cadastrar e acompanhar clientes",
+    "Como importar uma planilha",
+    "Como consultar crédito e pendências",
+    "Como configurar o Microsoft Authenticator",
+    "Como gerar relatórios e acompanhar repasses",
+  ];
+  const resultadosSuporte = buscaSuporte
+    ? topicosSuporte.filter((topico) =>
+        topico.toLowerCase().includes(buscaSuporte.toLowerCase()),
+      )
+    : [];
 
   useEffect(() => {
-    let timer;
-    const reiniciar = () => {
-      clearTimeout(timer);
-      setSidebarRecolhida(false);
-      timer = setTimeout(
-        () => {
-          if (window.innerWidth > 820) setSidebarRecolhida(true);
-        },
-        Number(localStorage.getItem("avanco-sidebar-idle") || 30) * 1000,
-      );
-    };
-    ["mousemove", "keydown", "click", "scroll"].forEach((evento) =>
-      window.addEventListener(evento, reiniciar, { passive: true }),
-    );
-    reiniciar();
-    return () => {
-      clearTimeout(timer);
-      ["mousemove", "keydown", "click", "scroll"].forEach((evento) =>
-        window.removeEventListener(evento, reiniciar),
-      );
-    };
-  }, []);
-
-  async function carregar() {
-    const params = new URLSearchParams({ q, imobiliaria });
- …36942 tokens truncated…ds">
+    if (!supabaseClient) return;
+    supabaseClient.auth.getUser().then(({ data }) => {
+      const user = …37975 tokens truncated…ds">
                   <label className="document-type-field group-filter-field">
                     <span>Grupo de documentos</span>
                     <select
