@@ -18,6 +18,7 @@ import {
   FileText,
   Filter,
   HelpCircle,
+  GripVertical,
   LayoutDashboard,
   Menu,
   Download,
@@ -459,7 +460,7 @@ function App() {
   const [sidebarRecolhida, setSidebarRecolhida] = useState(false);
   const [suporteAberto, setSuporteAberto] = useState(false);
   const [termoSuporte, setTermoSuporte] = useState("");
-  const [buscaSuporte, setBusc…40171 tokens truncated…poIndex + 1).padStart(2, "0")}</span>
+  const [busca…40746 tokens truncated…poIndex + 1).padStart(2, "0")}</span>
                         <h3>{grupo.nome}</h3>
                       </div>
                       <ol>
