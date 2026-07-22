@@ -27,6 +27,7 @@ import {
   Plus,
   Search,
   Settings,
+  ShieldCheck,
   SlidersHorizontal,
   Trash2,
   Save,
@@ -461,8 +462,7 @@ function App() {
   const [nomeSuporte, setNomeSuporte] = useState("Usuário");
 
   const topicosSuporte = [
-    "Como cadastrar e acompanhar clientes",
-  …39976 tokens truncated…            <ol>
+    "Como cadastrar e acompanha…39980 tokens truncated…            <ol>
                         {grupo.documentos.map((documento) => (
                           <li key={documento}>
                             <Check size={13} />
