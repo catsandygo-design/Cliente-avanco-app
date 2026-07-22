@@ -113,7 +113,11 @@ async function uploadReservationDocuments(
     const { error: uploadError } = await supabaseClient.storage
       .from("reservation-documents")
       .upload(path, conteudo, { contentType: comprimido ? 'application/gzip' : file.type, upsert: false });
-    if (uploadError) throw uploadError;
+    if (uploadError) {
+      if (/mime type|not supported/i.test(uploadError.message || ""))
+        throw new Error("Este formato de arquivo ainda não está liberado no armazenamento. Atualize a página e tente novamente.");
+      throw uploadError;
+    }
     const { data, error } = await supabaseClient
       .from("reservation_documents")
       .insert({
@@ -459,10 +463,7 @@ function App() {
   const [menuAberto, setMenuAberto] = useState(false);
   const [carregando, setCarregando] = useState(true);
   const [erroCarregamento, setErroCarregamento] = useState("");
-  const [clienteSelecionado, setClienteSelecionado] = useState(null);
-  const [repasseSelecionado, setRepasseSelecionado] = useState(null);
-  const [tela, setTela] = useState("clientes");
-  const [sidebarRecolhida, setSidebarRecolhid…45721 tokens truncated…poIndex + 1).padStart(2, "0")}</span>
+  const [client…45776 tokens truncated…poIndex + 1).padStart(2, "0")}</span>
                         <h3>{grupo.nome}</h3>
                       </div>
                       <ol>
