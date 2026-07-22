@@ -8,6 +8,12 @@ import * as XLSX from 'xlsx';
 const app = express();
 app.use(cors());
 app.use(express.json());
+const responderErroInterno = (res, error, contexto) => {
+  console.error(`[${contexto}]`, error);
+  return res.status(500).json({
+    erro: 'Não foi possível concluir a operação. Tente novamente ou contate o suporte.',
+  });
+};
 const uploadPlanilha = multer({ storage: multer.memoryStorage(), limits: { fileSize: 10 * 1024 * 1024, files: 1 }, fileFilter: (_, file, cb) => cb(null, /\.(xls|xlsx)$/i.test(file.originalname)) });
 
 const supabase = process.env.SUPABASE_URL && process.env.SUPABASE_SECRET_KEY
@@ -141,7 +147,7 @@ async function authenticate(req, res, next) {
     req.user = data.user;
     req.userRole = member.role;
     next();
-  } catch (error) { res.status(500).json({ erro: error.message }); }
+  } catch (error) { responderErroInterno(res, error, 'authenticate'); }
 }
 
 const allowRoles = (...roles) => (req, res, next) => !supabase || roles.includes(req.userRole)
@@ -164,7 +170,7 @@ app.get('/api/resumo', async (_, res) => {
     await ensureSeedData();
     const dados = await listReservations();
     res.json({ total: dados.length, repasseMes: dados.filter(c => c.repasseMes).length, comCreditu: dados.filter(c => c.creditu).length, finalizados: dados.filter(c => c.etapaAtual === etapas.length - 1).length, pendentes: dados.filter(c => /pend/i.test(c.status)).length });
-  } catch (error) { res.status(500).json({ erro: error.message }); }
+  } catch (error) { responderErroInterno(res, error, 'resumo'); }
 });
 app.get('/api/clientes', async (req, res) => {
   const q = String(req.query.q || '').toLowerCase();
@@ -175,7 +181,7 @@ app.get('/api/clientes', async (req, res) => {
     if (q) dados = dados.filter(c => [c.reserva, c.cliente, c.corretor, c.status].join(' ').toLowerCase().includes(q));
     if (imobiliaria !== 'TODOS') dados = dados.filter(c => c.imobiliaria === imobiliaria);
     res.json(dados);
-  } catch (error) { res.status(500).json({ erro: error.message }); }
+  } catch (error) { responderErroInterno(res, error, 'listar-clientes'); }
 });
 app.post('/api/importar-planilha', allowRoles('owner','admin','manager'), uploadPlanilha.single('planilha'), async (req, res) => {
   if (!req.file) return res.status(400).json({ erro: 'Selecione uma planilha .xls ou .xlsx válida.' });
@@ -253,7 +259,7 @@ app.post('/api/importar-planilha', allowRoles('owner','admin','manager'), upload
       }
     }
     res.json(stats);
-  } catch (error) { res.status(500).json({ erro: `Falha ao importar planilha: ${error.message}` }); }
+  } catch (error) { responderErroInterno(res, error, 'importar-planilha'); }
 });
 app.post('/api/clientes', allowRoles('owner','admin','manager','analyst','broker'), async (req, res) => {
   if (supabase) {
@@ -264,7 +270,7 @@ app.post('/api/clientes', allowRoles('owner','admin','manager','analyst','broker
       const { data, error } = await supabase.from('reservations').insert({ organization_id: orgId, client_id: client.id, code: req.body.reserva, broker_name: req.body.corretor, real_estate_agency: req.body.imobiliaria, current_stage: Number(req.body.etapaAtual || 0), status: req.body.status || 'Em processo', priority: priorityToDb(req.body.prioridade), credit_provider: Boolean(req.body.creditu), monthly_transfer: Boolean(req.body.repasseMes), notes: req.body.observacoes }).select('*, clients(*)').single();
       if (error) throw error;
       return res.status(201).json(mapReservation(data));
-    } catch (error) { return res.status(500).json({ erro: error.message }); }
+    } catch (error) { return responderErroInterno(res, error, 'criar-cliente'); }
   }
   const novo = { id: uuid(), ...req.body, etapaAtual: Number(req.body.etapaAtual || 0), atualizadoEm: new Date().toISOString() };
   clientes.unshift(novo);
@@ -287,7 +293,7 @@ app.patch('/api/clientes/:id', allowRoles('owner','admin','manager','analyst','b
       const { data, error } = await supabase.from('reservations').update(update).eq('id', req.params.id).select('*, clients(*)').single();
       if (error) throw error;
       return res.json(mapReservation(data));
-    } catch (error) { return res.status(500).json({ erro: error.message }); }
+    } catch (error) { return responderErroInterno(res, error, 'atualizar-cliente'); }
   }
   const i = clientes.findIndex(c => c.id === req.params.id);
   if (i < 0) return res.status(404).json({ erro: 'Cliente não encontrado' });
@@ -297,7 +303,7 @@ app.patch('/api/clientes/:id', allowRoles('owner','admin','manager','analyst','b
 app.delete('/api/clientes/:id', allowRoles('owner','admin'), async (req, res) => {
   if (supabase) {
     const { error } = await supabase.from('reservations').delete().eq('id', req.params.id);
-    if (error) return res.status(500).json({ erro: error.message });
+    if (error) return responderErroInterno(res, error, 'excluir-cliente');
     return res.status(204).end();
   }
   clientes = clientes.filter(c => c.id !== req.params.id);
@@ -310,3 +316,4 @@ if (process.env.NODE_ENV !== 'production') {
 }
 
 export default app;
+
