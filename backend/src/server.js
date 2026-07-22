@@ -6,8 +6,43 @@ import multer from 'multer';
 import * as XLSX from 'xlsx';
 
 const app = express();
-app.use(cors());
-app.use(express.json());
+app.disable('x-powered-by');
+const origensPermitidas = new Set([
+  'https://cliente-avanco-app.vercel.app',
+  'http://localhost:5173',
+  'http://localhost:5174',
+  process.env.APP_ORIGIN,
+  process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : null,
+].filter(Boolean));
+app.use(cors({
+  origin(origin, callback) {
+    if (!origin || origensPermitidas.has(origin)) return callback(null, true);
+    return callback(new Error('Origem não permitida'));
+  },
+  methods: ['GET', 'POST', 'PATCH', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Authorization', 'Content-Type'],
+  maxAge: 86400,
+}));
+app.use(express.json({ limit: '1mb' }));
+const limitesPorIp = new Map();
+app.use('/api', (req, res, next) => {
+  const agora = Date.now();
+  const janela = 60 * 1000;
+  const limite = 120;
+  const ip = String(req.headers['x-forwarded-for'] || req.ip || 'desconhecido').split(',')[0].trim();
+  let registro = limitesPorIp.get(ip);
+  if (!registro || registro.expiraEm <= agora) registro = { total: 0, expiraEm: agora + janela };
+  registro.total += 1;
+  limitesPorIp.set(ip, registro);
+  res.set('RateLimit-Limit', String(limite));
+  res.set('RateLimit-Remaining', String(Math.max(0, limite - registro.total)));
+  res.set('RateLimit-Reset', String(Math.ceil(registro.expiraEm / 1000)));
+  if (registro.total > limite)
+    return res.status(429).json({ erro: 'Muitas solicitações. Aguarde um minuto e tente novamente.' });
+  if (limitesPorIp.size > 10000)
+    for (const [chave, valor] of limitesPorIp) if (valor.expiraEm <= agora) limitesPorIp.delete(chave);
+  next();
+});
 const responderErroInterno = (res, error, contexto) => {
   console.error(`[${contexto}]`, error);
   return res.status(500).json({
@@ -308,6 +343,12 @@ app.delete('/api/clientes/:id', allowRoles('owner','admin'), async (req, res) =>
   }
   clientes = clientes.filter(c => c.id !== req.params.id);
   res.status(204).end();
+});
+
+app.use((error, req, res, next) => {
+  if (error?.message === 'Origem não permitida')
+    return res.status(403).json({ erro: 'Origem não permitida.' });
+  return responderErroInterno(res, error, 'middleware');
 });
 
 if (process.env.NODE_ENV !== 'production') {
