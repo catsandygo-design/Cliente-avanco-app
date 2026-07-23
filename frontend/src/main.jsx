@@ -463,7 +463,7 @@ function App() {
   const [menuAberto, setMenuAberto] = useState(false);
   const [carregando, setCarregando] = useState(true);
   const [erroCarregamento, setErroCarregamento] = useState("");
-  const [client…51000 tokens truncated…poIndex + 1).padStart(2, "0")}</span>
+  const [client…50901 tokens truncated…poIndex + 1).padStart(2, "0")}</span>
                         <h3>{grupo.nome}</h3>
                       </div>
                       <ol>
