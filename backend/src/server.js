@@ -231,7 +231,7 @@ app.post('/api/pre-cadastros', allowRoles('owner','admin','manager','analyst','b
 });
 app.patch('/api/pre-cadastros/:id', allowRoles('owner','admin','manager','analyst','broker'), async (req, res) => {
   try {
-    const permitidos = ['client_name','cpf_cnpj','email','phone','development','broker_name','real_estate_agency','status','notes'];
+    const permitidos = ['client_name','cpf_cnpj','email','phone','development','broker_name','real_estate_agency','status','notes','approval_status','rejection_reason','details'];
     const payload = Object.fromEntries(Object.entries(req.body).filter(([chave]) => permitidos.includes(chave)));
     const { data, error } = await supabase.from('pre_registrations').update(payload).eq('id', req.params.id).select().single();
     if (error) throw error;
